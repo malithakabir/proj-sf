@@ -1,0 +1,31 @@
+name: CI
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        steps:
+          - uses: actions/checkout@v4
+          - name: compile talib from source
+            run: |
+                wget http://prdownloads.sourceforge.net/ta-lib/ta-lib-0.4.0-src.tar.gz
+                tar -xzf ta-lib-0.4.0-src.tar.gz
+                cd ta-lib
+                ./configure
+                make
+                sudo make install
+          - name: install packages
+            run: make install
+          - name: lint
+            run: make lint
+          - name: test
+            run: make test
+          - name: format
+            run: make format
+          # - name: deploy
+          #   run: make deploy
