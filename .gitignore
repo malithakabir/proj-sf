@@ -175,3 +175,4 @@ main.py
 
 # ignore pickle
 data/*.pickle
+model/*.h5
