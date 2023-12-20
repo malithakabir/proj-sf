@@ -162,14 +162,16 @@ cython_debug/
 # vs code
 *.code-workspace
 # ignore notebook
-1.ReadRemoteFromYahooFinance.ipynb
-2.PerformTechnicalAnalysis.ipynb
-3.PrepareDataForModeling.ipynb
-4.TrainModel.ipynb
-5.PredictUsingModel.ipynb
-test.ipynb
+debug/
+# 1.ReadRemoteFromYahooFinance.ipynb
+# 2.PerformTechnicalAnalysis.ipynb
+# 3.PrepareDataForModeling.ipynb
+# 4.TrainModel.ipynb
+# 5.PredictUsingModel.ipynb
+# test.ipynb
 
 # ignore main
 main.py
-src/dtfetch.py
-src/model_base.py
+
+# ignore pickle
+data/*.pickle

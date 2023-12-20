@@ -1,5 +1,13 @@
 import datetime as dt
 
+FILENAME_PRESETS = {
+    "RAW": "./data/{}_RAW_V{}.csv",
+    "TA": "data/{}_TA_V{}.csv",
+    "MODEL": "model/{}.h5",
+    "TRAINING_HISTORY": "model/{}.json",
+    "PREPROCESSED": "data/{}_PREPROCESSED_V{}.pickle",
+}
+
 
 class Timer:
     def __init__(self):

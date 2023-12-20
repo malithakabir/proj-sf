@@ -1,65 +1,81 @@
-import pickle
 import numpy as np
 from sklearn.preprocessing import StandardScaler
 
 
-class DataPrep:
-    """
-    Description:
-    It perform preprocessing
-    Technical analysis can be performed if isRawData evaluates to True
-    dropna command is required for before splitting training and test
+class DataPrepTraining:
+    """Prepares dataset for model training
+
+    Methods
+    -------
+    set_df: sets pandas dataframe to be processed
+    set_rw_fh_test_size: sets rolling_window, forecast_horizon, test_size in percentage
+    dropna: dron nan from pandas dataframe
+    generate_train_test_predict_split: splits pandas dataframe to training, test, prediction set
+    normalise_dataframe: apply scaler to dataframe
+    prepare_feature_and_label: prepares features and label from list object
+    save_all_data_for_model_training: exports python objects in pickle file
     """
 
     def __init__(self):
-        print("Instantiating preprocessor")
+        """
+        Attributes
+        ----------
+        isnadrop: bool, defaut -> False, required -> True to proceed
+        df: pandas.DataFrame, default -> None, call set_df to set value
+
+        # these needs to be set
+        rolling_window = -1
+        forecast_horizon = -1
+        test_size = -1
+
+        # Not Implemented properly
+        sequence_length = None
+        sample_size_mt = None
+        index_of_tt_split = None
+        """
+        print("Instantiating DataPrep")
 
         # required variable during runtime, must be invoked
         self.isnadrop = False
         self.df = None
-        self.isRawData = None
 
         # these needs to be set
         self.rolling_window = -1
         self.forecast_horizon = -1
         self.test_size = -1
-        
+
         # Not Implemented properly
         self.sequence_length = None
         self.sample_size_mt = None
         self.index_of_tt_split = None
 
-    def set_df(self, df, isRawData):
-        """
-        Description: It set (1) dataframe (2) type of dataframe
-        Notice: No technical analysis will be performed if isRawData evaluates to False or None, means - technical analysis already performed
-        """
+    def set_df(self, df):
+        """sets pandas.DataFrame in self.df"""
         self.df = df
-        self.isRawData = isRawData
+        print("setting dataframe to df")
 
     def dropna(self):
-        """
-        Description: It drops nan values
-        Notice: Parent dataframe is replace by this operation
-        """
+        """drops nan values from self.df and replaces after drop"""
         self.isnadrop = True
         self.df = self.df.dropna(axis=0).copy()
 
     def set_rw_fh_test_size(self, rw, fh, test_size):
-        """
-        Description: Sets rolling window and forecast horizons
-        """
+        """sets rolling window, forecast horizons, test set size in percentage"""
         self.rolling_window = rw
         self.forecast_horizon = fh
         self.test_size = test_size
-        
+
     def generate_train_test_predict_split(self):
-        """
-        Required:
+        """splits pandas.DataFrame to 3 parts
+
+        Required
+        ---------
             df
             rolling_window
             test_size
-        Returns: dict [df_train, df_test, df_predict]
+        Returns
+        -------
+            dict [df_train, df_test, df_predict]
         """
         if self.isnadrop:
             df_predict = self.df.iloc[
@@ -104,7 +120,7 @@ class DataPrep:
                 scaler.fit(window)
                 normalised_data.append(scaler.transform(window))
                 scalers.append(scaler)
-            return {"normalised_data": normalised_data, "scalers": scalers}
+            return {"normalised_data_py_list": normalised_data, "scalers": scalers}
 
     def prepare_feature_and_label(self, data_list):
         """
@@ -123,12 +139,12 @@ class DataPrep:
         # reshape label to sample, timeframe, label
         labels = np.reshape(labels, (labels.shape[0], labels.shape[1], 1))
 
-        return {"data": arr, "features": features, "labels": labels}
+        return {"normalised_data_np_array": arr, "features": features, "labels": labels}
 
-    def save_all_data_for_model_training(self, datadict, ticker, version):
-        if ticker is None or version is None:
-            raise ValueError("both ticker and version are requied")
-        fpath = "data/{}_PREPROCESSED_V{}.pickle".format(ticker, version)
-        with open(fpath, "wb") as f:
-            pickle.dump(datadict, f)
-        print("data saved")
+    # def save_all_data_for_model_training(self, datadict, ticker, version):
+    #     if ticker is None or version is None:
+    #         raise ValueError("both ticker and version are requied")
+    #     fpath = "data/{}_PREPROCESSED_V{}.pickle".format(ticker, version)
+    #     with open(fpath, "wb") as f:
+    #         pickle.dump(datadict, f)
+    #     print("data saved")

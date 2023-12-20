@@ -4,9 +4,17 @@ from sklearn.metrics import mean_squared_error as mse
 
 
 def invert_scale_N_feature(scaler, data, prediction):
-    """
-    Important: data includes the target and features
-    Note: the first column in always the target i.e.: Adj Close
+    """takes scaler, data, prediction
+    TODO
+    Rewrite code, data object is not required
+
+    Important
+    ---------
+    data includes the target and features
+
+    Note
+    ----
+    the first column in always the target i.e.: Adj Close
     """
     #   the 1st column is the 'Adj Close' price column
     any_seq_length = data.shape[0]
@@ -31,7 +39,22 @@ def invert_scale_N_feature(scaler, data, prediction):
 
 def calculate_rmse(scalers, data, labels, predicts, splitname):
     """
-    Notice: splitname is manually provided, should come from the data itself, i.e.: test, training, validation
+    Parameters
+    ----------
+    scalers: list
+    data: numpy 3D
+    labels: numpy 2D
+    predicts: numpy 2D
+    splitname: str, annotation of data, examples: training, test, validation, prediction
+
+    Notice
+    ------
+    TODO
+    Rewrite docstring
+
+    splitname is manually provided,
+    should come from the data itself,
+    i.e.: test, training, validation
     """
     # invert the predicted and original test value to USD
 

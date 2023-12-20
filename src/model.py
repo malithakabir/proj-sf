@@ -1,39 +1,48 @@
-import os
 import json
 import pickle
 from src.utils import Timer
 from keras.layers import (
     Dense,
     Input,
-    Activation,
     Dropout,
     RepeatVector,
-    TimeDistributed,
-    Flatten,
 )
 from keras.layers import LSTM
-from keras.models import Sequential, Model, load_model
+from keras.models import Sequential, Model
 from keras.callbacks import EarlyStopping, ModelCheckpoint, LearningRateScheduler
 from keras.optimizers import SGD
-import datetime as dt
 
 
 class CustomModel:
-    """
-    Description:
-    (1) use config_data to read data from pickle
-    (2) use config_model to build model
-    (3) use config_training  to set train model
-    (4) use config_dir to save file
+    """Constructs customized class for data reading, model training
+
+    Description
+    -----------
+    (1) reads data for training
+    (2) builds model
+    (3) train model
+    (4) export model
+    (5) export training history
     """
 
     def __init__(self) -> None:
+        """constructs CustomModel class
+
+        Parameters
+        ----------
+        model: Keras Sequential model
+        dataset: All required data
+        history: model training history
+        """
         self.model = Sequential()
         self.dataset = None
-        self.training_history = None
+        self.history = None
 
     def build_model(self, input_n, output_n, drop_rate, latent_n, feature_n):
-        """
+        """compile model
+
+        Parameters
+        ----------
         input_n: the length of the input sequence
         output_n: the length of the predicted sequence
         feature_n: how many features we have in the model
@@ -44,6 +53,7 @@ class CustomModel:
         print("output_n", output_n)
         print("latent_n", latent_n)
         print("feature_n", feature_n)
+        print("drop_rate", drop_rate)
 
         # =============================================================================
         # Bidirectional LSTM
@@ -101,6 +111,22 @@ class CustomModel:
         self.model = model
 
     def train(self, X_train, y_train, X_test, y_test, epochs, batch_size, modelpath):
+        """train and export model, exports training history
+
+        Notice
+        ------
+        TODO: docstring imporvement required
+
+        Parameters
+        ----------
+        X_train:
+        y_train:
+        X_test:
+        y_test:
+        epochs: int, required
+        batch_size: int, required
+        modelpath: str, required, path to model in model directory
+        """
         timer = Timer()
         timer.start()
         print("[Model] Training Started")
@@ -108,10 +134,9 @@ class CustomModel:
 
         # Set the learning rate scheduler
         lr_schedule = LearningRateScheduler(
-            lambda epoch: 1e-5 * 10**(epoch / 20) if epoch < 55 else 0.001
-            )
+            lambda epoch: 1e-5 * 10 ** (epoch / 20) if epoch < 55 else 0.001
+        )
 
-        
         callbacks = [
             lr_schedule,
             EarlyStopping(monitor="val_loss", patience=10),
@@ -120,7 +145,7 @@ class CustomModel:
             ),
         ]
 
-        history = self.model.fit(
+        self.history = self.model.fit(
             X_train,
             y_train,
             epochs=epochs,
@@ -131,18 +156,16 @@ class CustomModel:
         self.model.save(modelpath)
 
         # save history here
-        self.log_training_history(
-            history=history.history, fpath=modelpath.replace(".h5", ".json")
-        )
+        fpath = modelpath.replace(".h5", ".json")
+        with open(fpath, "w", encoding="utf-8") as f:
+            self.history.history["lr"] = [float(x) for x in self.history.history["lr"]]
+            json.dump(self.history.history, f, ensure_ascii=False, indent=4)
 
         print("[Model] Training Completed. Model saved as %s" % modelpath)
         timer.stop()
 
-    def log_training_history(self, history, fpath):
-        with open(fpath, "w", encoding="utf-8") as f:
-            json.dump(history, f, ensure_ascii=False, indent=4)
-
-    def load_dataset(self, filepath=None):
+    def read_all_data_for_model_training(self, filepath=None):
+        """read pickle file from /data directory of project root where pickle file contains all the necessary data"""
         if filepath is None:
             raise ValueError("filepath must be provided")
         with open(filepath, "rb") as f:
